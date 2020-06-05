@@ -20,6 +20,7 @@
         <Button Content="Data Load" Command="{Binding LoadCommand, Mode=OneWay}" HorizontalAlignment="Left" Margin="243,62,0,0" VerticalAlignment="Top" Width="507" Height="20"/>
         <Button Content="Confirm" Command="{Binding ConfirmCommand}" HorizontalAlignment="Left" Margin="42,358,0,0" VerticalAlignment="Top" Width="76" Height="20"/>
         <Button Content="Add" Command="{Binding AddCommand}" HorizontalAlignment="Left" Margin="630,358,0,0" VerticalAlignment="Top" Width="75" Height="20"/>
+        <Button Content="Find" HorizontalAlignment="Left" Margin="630,358,0,0" VerticalAlignment="Top" Width="75" Height="20"/>
         <DataGrid SelectionMode="Single" Name="DataGridTest" ItemsSource="{Binding LoggingEntries}" SelectedItem="{Binding SelectedEntries}" Margin="0,101,0,0" Height="238" VerticalAlignment="Top">
 
         </DataGrid>
