@@ -1,12 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using DuplicateCheckerLib;
 using MySql.Data.MySqlClient;
-
 
 namespace LogSystem
 {
-    public class LoggEntryReppo : IDisposable
+    public class LoggEntryReppo 
     {
         private IDbConnection dbConnection;
         private LoggViewModel _loggViewModel;
@@ -29,7 +30,7 @@ namespace LogSystem
                 {
                     object[] values = new object[dataReader.FieldCount];
                     dataReader.GetValues(values);
-                    LoggingEntry loggingEntry = new LoggingEntry()
+                    LoggingEntry loggingEntry = new LoggingEntry
                     {
                         Id = (int)dataReader["Id"],
                         Hostname = dataReader["hostname"].ToString(),
@@ -169,10 +170,30 @@ namespace LogSystem
             }
         }
 
-        public void Dispose()
+        internal bool CanFindDuplicates()
         {
-            CloseConnection();
-            Dispose();
+            return _loggViewModel.LoggingEntries.Count > 0;
+        }
+        internal void FindDuplicates()
+        {
+            try
+            {
+                IEnumerable<IEntity> moreTimes = new DuplicateChecker().FindDuplicates(_loggViewModel.LoggingEntries);
+                ObservableCollection<LoggingEntry> observableCollection = new ObservableCollection<LoggingEntry>();
+                using (IEnumerator<IEntity> enumerator = moreTimes.GetEnumerator())
+                {
+                    while (enumerator.MoveNext())
+                    {
+                        IEntity now = enumerator.Current;
+                        observableCollection.Add((LoggingEntry)now);
+                    }
+                }
+                _loggViewModel.DuplicateLogginEntries = observableCollection;
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine("ERROR READING DUPLICATE ENTRY: {0}",ex.Message);
+            }
         }
     }
 }

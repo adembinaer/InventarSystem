@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:LogSystem"
              xmlns:loggControl="clr-namespace:LogSystem"
-             mc:Ignorable="d" Width="1000" Height="600">
+             mc:Ignorable="d" Width="800" Height="600">
     <UserControl.DataContext>
         <loggControl:LoggViewModel/>
     </UserControl.DataContext>
@@ -19,11 +19,13 @@
         <Label Content="Unacknowledged log entries" HorizontalAlignment="Left" Margin="26,62,0,0" VerticalAlignment="Top" Width="168" Height="26"/>
         <Button Content="Data Load" Command="{Binding LoadCommand, Mode=OneWay}" HorizontalAlignment="Left" Margin="243,62,0,0" VerticalAlignment="Top" Width="507" Height="20"/>
         <Button Content="Confirm" Command="{Binding ConfirmCommand}" HorizontalAlignment="Left" Margin="42,358,0,0" VerticalAlignment="Top" Width="76" Height="20"/>
-        <Button Content="Add" Command="{Binding AddCommand}" HorizontalAlignment="Left" Margin="630,358,0,0" VerticalAlignment="Top" Width="75" Height="20"/>
-        <Button Content="Find" HorizontalAlignment="Left" Margin="630,358,0,0" VerticalAlignment="Top" Width="75" Height="20"/>
-        <DataGrid SelectionMode="Single" Name="DataGridTest" ItemsSource="{Binding LoggingEntries}" SelectedItem="{Binding SelectedEntries}" Margin="0,101,0,0" Height="238" VerticalAlignment="Top">
-
-        </DataGrid>
+        <Button Content="Add" Command="{Binding AddCommand}" HorizontalAlignment="Left" Margin="324,355,0,0" VerticalAlignment="Top" Width="75" Height="20"/>
+        <Button Content="Find Duplicate" Command="{Binding FindDuplicateCommand }"  HorizontalAlignment="Left" Margin="558,354,0,0" VerticalAlignment="Top" Width="74" Height="20"/>
+        <DataGrid SelectionMode="Single" Name="DataGridTest" ItemsSource="{Binding LoggingEntries}" SelectedItem="{Binding SelectedEntries}" Margin="0,101,362,0" Height="238" VerticalAlignment="Top"/>
+        <DataGrid x:Name="grdDuplicates" IsReadOnly="true" HorizontalAlignment="Left" Height="226"
+                  Margin="414,108,0,0" VerticalAlignment="Top" Width="333"
+                  ItemsSource="{Binding DuplicateLogginEntries, Mode=TwoWay, NotifyOnSourceUpdated=true}"
+                  SelectedItem="{Binding Path=SelectedDuplicate, Mode=TwoWay}"/>
         <Label x:Name="lblDescription" Content="PoD" HorizontalAlignment="Left" Margin="37,388,0,0" Height="24"
             VerticalAlignment="Top" RenderTransformOrigin="-0.531,-0.9" Width="32"/>
         <Label x:Name="lblDevicename" Content="Hostname" HorizontalAlignment="Left" Margin="189,390,0,0"

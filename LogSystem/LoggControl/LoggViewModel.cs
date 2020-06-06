@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
 
@@ -9,10 +8,13 @@ namespace LogSystem
     {
         private LoggEntryReppo _loggEntryReppo;
         private ObservableCollection<LoggingEntry> _loggingEntries;
+        private ObservableCollection<LoggingEntry> _duplicateLoggingEntries;
         private LoggingEntry _selectedEntries;
+        private LoggingEntry _selectedDuplicate;
         private ICommand confirmCommand;
         private ICommand loadCommand;
         private ICommand addCommand;
+        private ICommand findDuplicateCommand;
         private int _pod;
         private string _devicenameItem;
         private int _level;
@@ -34,6 +36,20 @@ namespace LogSystem
                 NotifyPropertyChanged(nameof(LoggingEntries));
             }
         }
+        public ObservableCollection<LoggingEntry> DuplicateLogginEntries
+        {
+            get
+            {
+                return _duplicateLoggingEntries;
+            }
+            set
+            {
+                if (_duplicateLoggingEntries == value)
+                    return;
+                _duplicateLoggingEntries = value;
+                NotifyPropertyChanged(nameof(DuplicateLogginEntries));
+            }
+        }
         public LoggingEntry SelectedEntries
         {
             get
@@ -46,6 +62,20 @@ namespace LogSystem
                     return;
                 _selectedEntries = value;
                 NotifyPropertyChanged(nameof(SelectedEntries));
+            }
+        }
+        public LoggingEntry SelectedDuplicate
+        {
+            get
+            {
+                return _selectedDuplicate;
+            }
+            set
+            {
+                if (_selectedDuplicate == value)
+                    return;
+                _selectedDuplicate = value;
+                NotifyPropertyChanged(nameof(SelectedDuplicate));
             }
         }
         public LoggViewModel()
@@ -88,6 +118,15 @@ namespace LogSystem
                 if (confirmCommand == null)
                     confirmCommand = new RelayCommand(param => _loggEntryReppo.ConfirmEntries(), param => _loggEntryReppo.CanConfirmEntries());
                 return confirmCommand;
+            }
+        }
+        public ICommand FindDuplicateCommand
+        {
+            get
+            {
+                if (findDuplicateCommand == null)
+                    findDuplicateCommand = new RelayCommand(param => _loggEntryReppo.FindDuplicates(),param =>_loggEntryReppo.CanFindDuplicates());
+                return findDuplicateCommand;
             }
         }
         public string ConnectionString
