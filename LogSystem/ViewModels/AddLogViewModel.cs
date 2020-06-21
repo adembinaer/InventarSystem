@@ -4,9 +4,9 @@ using System.Windows.Input;
 
 namespace LogSystem
 {
-    public class LoggViewModel : INotifyPropertyChanged
+    public class AddLogViewModel : INotifyPropertyChanged
     {
-        private LoggEntryReppo _loggEntryReppo;
+        private LogEntryViewModel _logEntryViewModel;
         private ObservableCollection<LoggingEntry> _loggingEntries;
         private ObservableCollection<LoggingEntry> _duplicateLoggingEntries;
         private LoggingEntry _selectedEntries;
@@ -78,10 +78,10 @@ namespace LogSystem
                 NotifyPropertyChanged(nameof(SelectedDuplicate));
             }
         }
-        public LoggViewModel()
+        public AddLogViewModel()
         {
             _connectionString = "server=localhost;database=musterag;uid=demo;password=JusKo1986;";
-            _loggEntryReppo = new LoggEntryReppo(this);
+            _logEntryViewModel = new LogEntryViewModel(this);
         }
         public void NotifyPropertyChanged(string name)
         {
@@ -95,7 +95,7 @@ namespace LogSystem
             get
             {
                 if (loadCommand == null)
-                    loadCommand = new RelayCommand(param => _loggEntryReppo.LoadEntries(), param => _loggEntryReppo.CanLoadEntries());
+                    loadCommand = new RelayCommand(param => _logEntryViewModel.LoadEntries(), param => _logEntryViewModel.CanLoadEntries());
                 return loadCommand;
             }
         }
@@ -105,7 +105,7 @@ namespace LogSystem
             {
                 if (addCommand == null)
                 {
-                    addCommand = new RelayCommand(param => _loggEntryReppo.AddEntries(), param => _loggEntryReppo.CanAddEntries());
+                    addCommand = new RelayCommand(param => _logEntryViewModel.AddEntries(), param => _logEntryViewModel.CanAddEntries());
                 }
 
                 return addCommand;
@@ -116,7 +116,7 @@ namespace LogSystem
             get
             {
                 if (confirmCommand == null)
-                    confirmCommand = new RelayCommand(param => _loggEntryReppo.ConfirmEntries(), param => _loggEntryReppo.CanConfirmEntries());
+                    confirmCommand = new RelayCommand(param => _logEntryViewModel.ConfirmEntries(), param => _logEntryViewModel.CanConfirmEntries());
                 return confirmCommand;
             }
         }
@@ -125,7 +125,7 @@ namespace LogSystem
             get
             {
                 if (findDuplicateCommand == null)
-                    findDuplicateCommand = new RelayCommand(param => _loggEntryReppo.FindDuplicates(),param =>_loggEntryReppo.CanFindDuplicates());
+                    findDuplicateCommand = new RelayCommand(param => _logEntryViewModel.FindDuplicates(),param =>_logEntryViewModel.CanFindDuplicates());
                 return findDuplicateCommand;
             }
         }

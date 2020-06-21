@@ -7,14 +7,14 @@ using MySql.Data.MySqlClient;
 
 namespace LogSystem
 {
-    public class LoggEntryReppo 
+    public class LogEntryViewModel 
     {
         private IDbConnection dbConnection;
-        private LoggViewModel _loggViewModel;
-        public LoggEntryReppo(LoggViewModel loggViewModel)
+        private AddLogViewModel _addLogViewModel;
+        public LogEntryViewModel(AddLogViewModel addLogViewModel)
         {
-            _loggViewModel = loggViewModel;
-            _loggViewModel.LoggingEntries = new ObservableCollection<LoggingEntry>();
+            _addLogViewModel = addLogViewModel;
+            _addLogViewModel.LoggingEntries = new ObservableCollection<LoggingEntry>();
         }
         public void ReadEntries()
         {
@@ -43,7 +43,7 @@ namespace LogSystem
                     observableCollection.Add(loggingEntry);
                 }
                 dataReader.Close();
-                _loggViewModel.LoggingEntries = observableCollection;
+                _addLogViewModel.LoggingEntries = observableCollection;
             }
             catch (Exception ex)
             {
@@ -56,14 +56,14 @@ namespace LogSystem
         }
         private void ConnectingToDatabase()
         {
-            if (string.IsNullOrEmpty(_loggViewModel.ConnectionString))
+            if (string.IsNullOrEmpty(_addLogViewModel.ConnectionString))
             {
                 Console.Error.WriteLine("ERROR, Wrong Connection");
                 throw new InvalidExpressionException("ERROR, Wrong Connection");
             }
             try
             {
-                dbConnection = new MySqlConnection(_loggViewModel.ConnectionString);
+                dbConnection = new MySqlConnection(_addLogViewModel.ConnectionString);
                 dbConnection.Open();
             }
             catch (Exception ex)
@@ -91,7 +91,7 @@ namespace LogSystem
         }
         internal bool CanLoadEntries()
         {
-            return !string.IsNullOrEmpty(_loggViewModel.ConnectionString);
+            return !string.IsNullOrEmpty(_addLogViewModel.ConnectionString);
         }
         internal void LoadEntries()
         {
@@ -108,10 +108,10 @@ namespace LogSystem
             {
                 try
                 {
-                    var pod = _loggViewModel.Pod;
-                    var devicenameItem = _loggViewModel.DevicenameItem;
-                    int num = _loggViewModel.Level;
-                    string message = _loggViewModel.Message;
+                    var pod = _addLogViewModel.Pod;
+                    var devicenameItem = _addLogViewModel.DevicenameItem;
+                    int num = _addLogViewModel.Level;
+                    string message = _addLogViewModel.Message;
                     IDbCommand command = dbConnection.CreateCommand();
                     command.CommandText = "CALL `LogMessageAdd`(@pod, @hostname, @level, @message);";
                     command.Parameters.Add(new MySqlParameter("@pod", pod));
@@ -120,10 +120,10 @@ namespace LogSystem
                     command.Parameters.Add(new MySqlParameter("@message", message));
                     if (command.ExecuteNonQuery() <= 0)
                         return;
-                    _loggViewModel.Pod = 0;
-                    _loggViewModel.DevicenameItem = "";
-                    _loggViewModel.Message = "";
-                    _loggViewModel.Level = 0;
+                    _addLogViewModel.Pod = 0;
+                    _addLogViewModel.DevicenameItem = "";
+                    _addLogViewModel.Message = "";
+                    _addLogViewModel.Level = 0;
                     ReadEntries();
                 }
                 catch (Exception ex)
@@ -140,7 +140,7 @@ namespace LogSystem
 
         internal bool CanConfirmEntries()
         {
-            var selectedLoggingEntries = _loggViewModel.SelectedEntries;
+            var selectedLoggingEntries = _addLogViewModel.SelectedEntries;
             return selectedLoggingEntries != null && (uint)selectedLoggingEntries.Id > 0U;
         }
 
@@ -150,7 +150,7 @@ namespace LogSystem
             {
                 try
                 {
-                    int id = _loggViewModel.SelectedEntries.Id;
+                    int id = _addLogViewModel.SelectedEntries.Id;
                     IDbCommand command = dbConnection.CreateCommand();
                     command.CommandText = "CALL `LogClear`(@id);";
                     command.Parameters.Add(new MySqlParameter("@id", id));
@@ -172,13 +172,13 @@ namespace LogSystem
 
         internal bool CanFindDuplicates()
         {
-            return _loggViewModel.LoggingEntries.Count > 0;
+            return _addLogViewModel.LoggingEntries.Count > 0;
         }
         internal void FindDuplicates()
         {
             try
             {
-                IEnumerable<IEntity> moreTimes = new DuplicateChecker().FindDuplicates(_loggViewModel.LoggingEntries);
+                IEnumerable<IEntity> moreTimes = new DuplicateChecker().FindDuplicates(_addLogViewModel.LoggingEntries);
                 ObservableCollection<LoggingEntry> observableCollection = new ObservableCollection<LoggingEntry>();
                 using (IEnumerator<IEntity> enumerator = moreTimes.GetEnumerator())
                 {
@@ -188,7 +188,7 @@ namespace LogSystem
                         observableCollection.Add((LoggingEntry)now);
                     }
                 }
-                _loggViewModel.DuplicateLogginEntries = observableCollection;
+                _addLogViewModel.DuplicateLogginEntries = observableCollection;
             }
             catch (Exception ex)
             {

@@ -7,7 +7,7 @@
              xmlns:loggControl="clr-namespace:LogSystem"
              mc:Ignorable="d" Width="800" Height="600">
     <UserControl.DataContext>
-        <loggControl:LoggViewModel/>
+        <loggControl:AddLogViewModel/>
     </UserControl.DataContext>
     <Grid Margin="20,20,20,26">
         <Grid.RowDefinitions>
