@@ -6,9 +6,9 @@ namespace LogSystem
 {
     public class RelayCommand : ICommand
     {
-        private readonly Predicate<object> _canExecute;
-        private readonly Action<object> _execute;
-        public RelayCommand(Action<object> execute, Predicate<object> canExecute)
+        private readonly Func<bool> _canExecute;
+        private readonly Action _execute;
+        public RelayCommand(Action execute, Func<bool> canExecute)
         {
             if (execute == null)
                 throw new ArgumentNullException(nameof(execute));
@@ -29,11 +29,13 @@ namespace LogSystem
         [DebuggerStepThrough]
         public bool CanExecute(object param)
         {
-            return _canExecute == null || _canExecute(param);
+            if (_canExecute != null)
+                return _canExecute();
+            return _canExecute == null;
         }
         public void Execute(object param)
         {
-            _execute(param);
+            _execute?.Invoke();
         }
     }
 }

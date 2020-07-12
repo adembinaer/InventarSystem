@@ -207,7 +207,6 @@
     <Compile Include="Models\Location.cs" />
     <Compile Include="Models\LoggingEntry.cs" />
     <Compile Include="RelayCommand.cs" />
-    <Compile Include="ViewModels\AddLogViewModel.cs" />
     <Compile Include="ViewModels\LogEntryViewModel.cs" />
     <Compile Include="Views\UserControl1.xaml.cs">
       <DependentUpon>UserControl1.xaml</DependentUpon>
