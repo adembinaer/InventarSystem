@@ -15,6 +15,12 @@ namespace LogSystem
             _execute = execute;
             _canExecute = canExecute;
         }
+        public RelayCommand(Action execute)
+        {
+            if (execute == null)
+                throw new ArgumentNullException(nameof(execute));
+            _execute = execute;
+        }
         public event EventHandler CanExecuteChanged
         {
             add
@@ -26,6 +32,7 @@ namespace LogSystem
                 CommandManager.RequerySuggested -= value;
             }
         }
+
         [DebuggerStepThrough]
         public bool CanExecute(object param)
         {

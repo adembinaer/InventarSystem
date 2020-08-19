@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
-using System.Windows.Input;
+using System.Data.SqlClient;
 using DuplicateCheckerLib;
+using LogSystem.DataAccess.ADO.NET;
 using MySql.Data.MySqlClient;
 
 namespace LogSystem
@@ -12,9 +13,9 @@ namespace LogSystem
     public class LogEntryViewModel : INotifyPropertyChanged
     {
         private IDbConnection dbConnection;
+        private readonly LogEntryRepository _dataRepository;
+        private readonly LogEntryRepository _clearRepository;
 
-        //private LogEntryViewModel _addLogViewModel;
-        private LogEntryViewModel _logEntryViewModel;
         private ObservableCollection<LoggingEntry> _loggingEntries;
         private ObservableCollection<LoggingEntry> _duplicateLoggingEntries;
         private LoggingEntry _selectedEntries;
@@ -29,6 +30,7 @@ namespace LogSystem
         public RelayCommand LoadCommand { get; }
         public RelayCommand AddCommand { get; }
         public RelayCommand FindDuplicateCommand { get; }
+        public RelayCommand LocationCommand { get; }
 
         public string ConnectionString
         {
@@ -117,52 +119,33 @@ namespace LogSystem
         public LogEntryViewModel()
         {
             LoggingEntries = new ObservableCollection<LoggingEntry>();
-            _connectionString = "server=localhost;database=musterag;uid=demo;password=JusKo1986;";
-            //_logEntryViewModel = new LogEntryViewModel();
+            //_connectionString = "server=localhost;database=musterag;uid=demo;password=JusKo1986;";
+            _connectionString = @"Data Source = BPMNFOREVER\ZBWBINAER; Integrated Security = SSPI; Initial Catalog=musterag;";
+            //_connectionString = "data source = BPMNFOREVER\\ZBWBINAER; initial catalog = musterag; Integrated Security =SSPI;";
+            _dataRepository = new LogEntryRepository();
+            _clearRepository = new LogEntryRepository();
             LoadCommand = new RelayCommand(LoadEntries, CanLoadEntries);
             AddCommand = new RelayCommand(AddEntries, CanAddEntries);
             ConfirmCommand = new RelayCommand(ConfirmEntries, CanConfirmEntries);
             FindDuplicateCommand = new RelayCommand(FindDuplicates, CanFindDuplicates);
-
+            LocationCommand = new RelayCommand(OpenLocationDialog);
         }
-
         public void ReadEntries()
         {
             if (!ConnectionOpen())
                 return;
             try
             {
-                //ObservableCollection<LoggingEntry> observableCollection = new ObservableCollection<LoggingEntry>();
-                IDbCommand command = dbConnection.CreateCommand();
-                command.CommandText = "SELECT * FROM v_logentries;";
-                IDataReader dataReader = command.ExecuteReader();
-                while (dataReader.Read())
+                LoggingEntries.Clear();
+                var result = _dataRepository.GetAll();
+                foreach (var i in result)
                 {
-                    object[] values = new object[dataReader.FieldCount];
-                    dataReader.GetValues(values);
-                    LoggingEntry loggingEntry = new LoggingEntry
-                    {
-                        Id = (int) dataReader["Id"],
-                        Hostname = dataReader["hostname"].ToString(),
-                        Location = dataReader["location"].ToString(),
-                        Message = dataReader["message"].ToString(),
-                        Pod = dataReader["pod"].ToString(),
-                        Severity = (int) dataReader["severity"],
-                        Timestamp = (DateTime) dataReader["timestamp"]
-                    };
-                    LoggingEntries.Add(loggingEntry);
+                    LoggingEntries.Add(i);
                 }
-
-                dataReader.Close();
-                //LoggingEntries = observableCollection;
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine(string.Format("ERROR, Wrong Connection: {0}", 0), ex.Message);
-            }
-            finally
-            {
-                CloseConnection();
             }
         }
 
@@ -176,7 +159,7 @@ namespace LogSystem
 
             try
             {
-                dbConnection = new MySqlConnection(ConnectionString);
+                dbConnection = new SqlConnection(ConnectionString);
                 dbConnection.Open();
             }
             catch (Exception ex)
@@ -184,7 +167,7 @@ namespace LogSystem
                 Console.Error.WriteLine(string.Format("ERROR, Wrong Connection: {0}", 0), ex.Message);
             }
         }
-
+        //private bool ConnectionOpen() => !string.IsNullOrWhiteSpace(ConnectionString);
         private bool ConnectionOpen()
         {
             if (dbConnection == null)
@@ -197,7 +180,10 @@ namespace LogSystem
                 ConnectingToDatabase();
             return false;
         }
-
+        private void OpenLocationDialog()
+        {
+            new LogSystem.Views.Location().ShowDialog();
+        }
         private void CloseConnection()
         {
             if (dbConnection == null)
@@ -219,72 +205,43 @@ namespace LogSystem
         {
             return dbConnection != null;
         }
-
         internal void AddEntries()
         {
-            if (!ConnectionOpen())
+            try
             {
-                try
+                _dataRepository.Add(new LoggingEntry
                 {
-                    var pod = Pod;
-                    var devicenameItem = DevicenameItem;
-                    int num = Level;
-                    string message = Message;
-                    IDbCommand command = dbConnection.CreateCommand();
-                    command.CommandText = "CALL `LogMessageAdd`(@pod, @hostname, @level, @message);";
-                    command.Parameters.Add(new MySqlParameter("@pod", pod));
-                    command.Parameters.Add(new MySqlParameter("@hostname", devicenameItem));
-                    command.Parameters.Add(new MySqlParameter("@level", num));
-                    command.Parameters.Add(new MySqlParameter("@message", message));
-                    if (command.ExecuteNonQuery() <= 0)
-                        return;
-                    Pod = 0;
-                    DevicenameItem = "";
-                    Message = "";
-                    Level = 0;
-                    ReadEntries();
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine(string.Format("ERROR, Wrong Connection: {0}", 0),
-                        ex.Message);
-                }
-                finally
-                {
-                    CloseConnection();
-                }
+                    Id = Pod,
+                    Hostname = DevicenameItem,
+                    Severity = Level,
+                    Message = Message
+                });
+                ReadEntries();
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(string.Format("ERROR, Wrong Connection: {0}", 0),
+                    ex.Message);
             }
         }
 
         internal bool CanConfirmEntries()
         {
             var selectedLoggingEntries = SelectedEntries;
-            return selectedLoggingEntries != null && (uint) selectedLoggingEntries.Id > 0U;
+            return selectedLoggingEntries != null && (uint)selectedLoggingEntries.Id > 0U;
         }
-
         internal void ConfirmEntries()
         {
-            if (!ConnectionOpen())
+            try
             {
-                try
-                {
-                    int id = SelectedEntries.Id;
-                    IDbCommand command = dbConnection.CreateCommand();
-                    command.CommandText = "CALL `LogClear`(@id);";
-                    command.Parameters.Add(new MySqlParameter("@id", id));
-                    if (command.ExecuteNonQuery() <= 0)
-                        return;
-                    ReadEntries();
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine(string.Format("ERROR, Wrong Connection: {0}", 0),
-                        ex.Message);
-                }
-                finally
-                {
-                    CloseConnection();
-                }
+                _clearRepository.Delete(_selectedEntries);
+
+                ReadEntries();
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine(string.Format("ERROR, Wrong Connection: {0}", 0),
+                    ex.Message);
             }
         }
 
@@ -304,7 +261,7 @@ namespace LogSystem
                     while (enumerator.MoveNext())
                     {
                         IEntity now = enumerator.Current;
-                        observableCollection.Add((LoggingEntry) now);
+                        observableCollection.Add((LoggingEntry)now);
                     }
                 }
 
@@ -318,7 +275,6 @@ namespace LogSystem
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-       
         public LoggingEntry SelectedEntries
         {
             get { return _selectedEntries; }
@@ -343,8 +299,6 @@ namespace LogSystem
             }
         }
 
-       
-
         public void NotifyPropertyChanged(string name)
         {
             PropertyChangedEventHandler propertyChanged = PropertyChanged;
@@ -352,9 +306,6 @@ namespace LogSystem
                 return;
             propertyChanged(this, new PropertyChangedEventArgs(name));
         }
-
-      
-
     }
 }
 

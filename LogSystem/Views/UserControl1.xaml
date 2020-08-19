@@ -17,6 +17,7 @@
         <Label Content="Connectionstring"  HorizontalAlignment="Left" Margin="26,22,0,0" VerticalAlignment="Top" Width="178" Height="26"/>
         <TextBox HorizontalAlignment="Left" Height="23" Margin="243,22,0,0" TextWrapping="Wrap" Text="{Binding ConnectionString}" VerticalAlignment="Top" Width="506"/>
         <Label Content="Unacknowledged log entries" HorizontalAlignment="Left" Margin="26,62,0,0" VerticalAlignment="Top" Width="168" Height="26"/>
+        <Button Content="Open Location" Command="{Binding LocationCommand}" HorizontalAlignment="Left" Margin="180,358,0,0" VerticalAlignment="Top" Width="91"/>
         <Button Content="Data Load" Command="{Binding LoadCommand, Mode=OneWay}" HorizontalAlignment="Left" Margin="243,62,0,0" VerticalAlignment="Top" Width="507" Height="20"/>
         <Button Content="Confirm" Command="{Binding ConfirmCommand}" HorizontalAlignment="Left" Margin="42,358,0,0" VerticalAlignment="Top" Width="76" Height="20"/>
         <Button Content="Add" Command="{Binding AddCommand}" HorizontalAlignment="Left" Margin="324,355,0,0" VerticalAlignment="Top" Width="75" Height="20"/>

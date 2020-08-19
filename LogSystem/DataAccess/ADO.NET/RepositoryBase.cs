@@ -9,13 +9,16 @@ using MySql.Data.MySqlClient;
 namespace LogSystem.DataAccess.ADO.NET
 {
     public abstract class RepositoryBase<M> : IRepositoryBase<M>
-    {
+    { 
+        protected string ConnectionString { get; }
+        protected readonly List<M> list;
         protected RepositoryBase()
         {
             // TODO: Load ConnectionString
-            this.ConnectionString = "<ConnString>";
+            ConnectionString = "server=localhost;database=musterag;uid=demo;password=JusKo1986;";
+            list = new List<M>();
         }
-        protected string ConnectionString { get; }
+       
         public M GetSingle<P>(P pkValue)
         {
             throw new NotImplementedException();
@@ -41,10 +44,7 @@ namespace LogSystem.DataAccess.ADO.NET
             throw new NotImplementedException();
         }
 
-        public List<M> GetAll()
-        {
-            throw new NotImplementedException();
-        }
+        public abstract List<M> GetAll();
 
         public long Count(string whereCondition, Dictionary<string, object> parameterValues)
         {

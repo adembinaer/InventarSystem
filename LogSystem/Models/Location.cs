@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DuplicateCheckerLib;
 
 namespace LogSystem.Models
 {
-    class Location
+    public class Location : IEntity
     {
+        public int Id { get; set; }
+        public int FK_PointOfDelivery { get; set; }
+        public int FK_Address { get; set; }
     }
 }
